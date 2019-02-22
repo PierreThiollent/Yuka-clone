@@ -1,8 +1,9 @@
 import React from "react";
-import {Modal, SafeAreaView, StyleSheet, Text, TouchableHighlight, View} from "react-native";
+import {SafeAreaView, StyleSheet} from "react-native";
 import Header from "./Header";
 import ScanButtonView from "./ScanButtonView";
 import ProductList from "./ProductList";
+import Scan from "./Scan";
 
 export default class App extends React.Component {
 
@@ -10,27 +11,45 @@ export default class App extends React.Component {
 		super(props);
 		this.state = {
 			products: [
-				{id: 1, name: 'Coca', date: new Date()},
-				{id: 2, name: 'Orangina', date: new Date()},
-				{id: 3, name: 'Nestea', date: new Date()},
-				{id: 4, name: 'Bière sans alcool', date: new Date()}
 			],
-			modalVisible: false
+			modalScanVisible: false,
+			hasCameraPermission: null,
 		}
 	}
 
 	handleScanPress = () => {
-		this.setModalVisible()
+		this.setModalScanVisible()
 	};
 
 	handleProductPress = (id) => {
-		alert('Je clique sur un produit avec l\'id : ' + id)
+		alert('Je clique sur un produit avec le code barre : ' + id)
 	};
 
-	setModalVisible() {
-		let newModalState = !this.state.modalVisible;
-		this.setState({modalVisible: newModalState});
-	}
+	getProductFromApi = async (data) => {
+		try {
+			let response = await fetch(
+				'https://fr.openfoodfacts.org/api/v0/produit/' + data + '.json'
+			);
+			let responseJson = await response.json();
+			return responseJson.product;
+		} catch (error) {
+			console.error(error);
+		}
+	};
+
+	_handleBarCodeRead = async ({type, data}) => {
+		let scannedProduct = await this.getProductFromApi(data);
+		let newProduct = {id: 1, name: scannedProduct.product_name, date: new Date()};
+		let _products = this.state.products;
+		_products.push(newProduct);
+		this.setState({products: _products});
+		this.setModalScanVisible()
+	};
+
+	setModalScanVisible = () => {
+		let newModalState = !this.state.modalScanVisible;
+		this.setState({modalScanVisible: newModalState});
+	};
 
 	render() {
 		return (
@@ -38,28 +57,9 @@ export default class App extends React.Component {
 				<Header/>
 				<ScanButtonView scan={this.handleScanPress}/>
 				<ProductList data={this.state.products} onPressItem={this.handleProductPress}/>
-				<Modal
-					animationType="slide"
-					transparent={false}
-					visible={this.state.modalVisible}
-					onRequestClose={() => {
-						Alert.alert('Modal has been closed.');
-					}}>
-					<SafeAreaView style={{flex: 1}}>
-						<Header/>
-						<View style={{flex: 1}}>
-							<View style={styles.modalContent}>
-							</View>
-							<TouchableHighlight
-								style={styles.hideModalButton}
-								onPress={() => {
-									this.setModalVisible(!this.state.modalVisible);
-								}}>
-								<Text style={styles.hideModalText}>Hide Modal</Text>
-							</TouchableHighlight>
-						</View>
-					</SafeAreaView>
-				</Modal>
+				<Scan modalVisibility={this.state.modalScanVisible} closeModal={this.setModalScanVisible}
+							handleBarCodeScanned={this._handleBarCodeRead}
+							getProducts={this.getProductFromApi}/>
 			</SafeAreaView>
 		);
 	}

@@ -1,16 +1,21 @@
 import React from "react";
-import {Dimensions, FlatList, StyleSheet} from "react-native";
+import {Dimensions, FlatList, StyleSheet, Text} from "react-native";
 import ProductItem from "./ProductItem";
 
 export default class ProductList extends React.Component {
 
+	_keyExtractor = (item) => item.id;
+
 	render() {
+		console.log(this.props.data)
 		return (
 			<FlatList
 				style={styles.flatList}
 				data={this.props.data}
-				renderItem={({item, index}) =>
-					<ProductItem detail={this.props.detail} onPressItem={item} key={index}/>
+				ListEmptyComponent={() => <Text>Veuillez scanner un produit</Text>}
+				keyExtractor={this._keyExtractor}
+				renderItem={({item}) =>
+					<ProductItem detail={item}/>
 				}
 			/>
 		)

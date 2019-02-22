@@ -4,10 +4,11 @@ import {Dimensions, StyleSheet, Text, TouchableOpacity} from "react-native";
 export default class ProductItem extends React.Component {
 	render() {
 		return (
-			<TouchableOpacity onPress={() => this.props.onPressItem(this.props.onPressItem.id)}
+			<TouchableOpacity onPress={() => {}}
 												style={styles.products}>
-				<Text style={styles.productsTitle}>{this.props.onPressItem.name}</Text>
-				<Text style={styles.productsTitle}>{this.props.onPressItem.date.toLocaleDateString()}</Text>
+				<Text style={styles.productsTitle}>{this.props.detail.name}</Text>
+				<Text style={styles.productsTitle}>{this.props.detail.id}</Text>
+				<Text style={styles.productsTitle}>{this.props.detail.date.toLocaleDateString()}</Text>
 			</TouchableOpacity>
 		)
 	}
